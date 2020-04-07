@@ -143,11 +143,18 @@ export function mountComponent (
   el: ?Element,
   hydrating?: boolean
 ): Component {
+  // 缓存$el
   vm.$el = el
+  // 如果当前没有render函数
   if (!vm.$options.render) {
+    // 创建一个空的VNode
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
       /* istanbul ignore if */
+      // 在runtime-only版本如果当前配置了template且template传入的不是一个ID名称
+      // 或者存在el属性
+      // 则报错
+      // 此时只能使用render函数
       if ((vm.$options.template && vm.$options.template.charAt(0) !== '#') ||
         vm.$options.el || el) {
         warn(
@@ -157,6 +164,7 @@ export function mountComponent (
           vm
         )
       } else {
+        // 如果什么都没有传入,则报错
         warn(
           'Failed to mount component: template or render function not defined.',
           vm
@@ -164,10 +172,12 @@ export function mountComponent (
       }
     }
   }
+
+  // 调用beforeMount生命周期钩子
   callHook(vm, 'beforeMount')
 
   let updateComponent
-  /* istanbul ignore if */
+  /* istanbul ignore if 性能统计相关 */
   if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
     updateComponent = () => {
       const name = vm._name
@@ -187,6 +197,7 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
+      // 调用render方法生成虚拟node
       vm._update(vm._render(), hydrating)
     }
   }
@@ -194,6 +205,8 @@ export function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
+  // 实例化一个渲染watcher
+  // 当数据改变时，调用第二个参数触发_update进行更新DOM
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted && !vm._isDestroyed) {

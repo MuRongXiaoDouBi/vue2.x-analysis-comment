@@ -38,7 +38,9 @@ Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
+  // 通过query方法转换DOM对象
   el = el && inBrowser ? query(el) : undefined
+  // 调用mountComponent生成虚拟DOM
   return mountComponent(this, el, hydrating)
 }
 
